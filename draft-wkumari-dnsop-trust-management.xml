@@ -3,7 +3,8 @@
 <!ENTITY rfc2119 PUBLIC "" ".//reference.RFC.2119.xml">
 ]>
 <!-- WK: Set category, IPR, docName -->
-<rfc category="info" docName="draft-wkumari-dnsop-trust-management" ipr="trust200902">
+<rfc category="info" docName="draft-wkumari-dnsop-trust-management"
+     ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
   <?rfc toc="yes" ?>
@@ -21,7 +22,8 @@
   <front>
     <!-- WK: Set long title. -->
 
-    <title abbrev="draft-wkumari-dnsop-trust-management">TODO: Template.</title>
+    <title abbrev="draft-wkumari-dnsop-trust-management">Simplified Updates of
+    DNS Security (DNSSEC) Trust Anchors</title>
 
     <author fullname="Warren Kumari" initials="W." surname="Kumari">
       <organization>Google</organization>
@@ -41,35 +43,63 @@
       </address>
     </author>
 
-    <date day="30" month="January" year="2015"/>
+    <date day="26" month="June" year="2015"/>
 
     <area>template</area>
 
     <workgroup>template</workgroup>
 
     <abstract>
-      <t>This is my standard ID Template.</t>
+      <t>This document describes a simple means for automated updating of
+      DNSSEC trust anchors. This mechanism allows the trust anchor maintainer
+      to monitor the progress of the migration to the new trust anchor, and so
+      predict the effect before decommisioning the existing trust anchor.</t>
+
+      <t>[ Ed note - informal summary: One of the big issues with rolling the
+      root key is that it is unclear who all is using RFC5011, who all has
+      successfully fetched and installed the new key, and, most importantly,
+      who all will die when the old key is revoked. A secondary problem is
+      that the response sizes suddenly increase, potentially blowing the MTU
+      limit. This document describes a method that is basically CDS, but for
+      the root key (or any other trust anchor). Unlike the CDS record though,
+      this record lives at a special name that communicates what all TAs the
+      recursive knows. This allows the TA maintainer to predict how many, and
+      who all will break...]</t>
 
       <t>[ Ed note: Text inside square brackets ([]) is additional background
-      information, answers to freqently asked questions, general musings, etc.
-      They will be removed before publication.]</t>
+      information, answers to frequently asked questions, general musings,
+      etc. They will be removed before publication.]</t>
 
       <t>[ This document is being collaborated on in Github at:
       https://github.com/wkumari/&lt;TEMPLATE&gt;. The most recent version of
       the document, open issues, etc should all be available here. The authors
-      (gratefully) acept pull requests ]</t>
+      (gratefully) accept pull requests ]</t>
     </abstract>
   </front>
 
   <middle>
     <section title="Introduction">
-      <t>This document is a template.</t>
+      <t>When a DNSSEC aware resolver performs validation, it requires a trust
+      anchor to validate the DNSSEC chain. An example of a trust anchor is the
+      so called DNSSEC "root key". For a variety of reasons this trust anchor
+      may need to be replaced or "rolled", to a new key (potentially with a
+      different algorithm, different key length, etc.).</t>
 
-      <t/>
+      <t><xref target="RFC5011"/> provides a secure mechanism to do this, but
+      operational experience has demonstrated a need for some additional
+      functionality that was not forseen.</t>
 
-      <t>Here is a reference to an "external" (non-RFC / draft) thing: (<xref
-      target="IANA.AS_Numbers"/>). And this is a link to an ID:<xref
-      target="I-D.ietf-sidr-iana-objects"/>.</t>
+      <t>During the recent effort to roll the IANA DNSSEC "root key", it has
+      become clear that, in order to predict (and minimize) outages caused by
+      rolling the key, one needs to know who does not have the new key. In
+      addition, RFC5011 style key rolls require "double signing", which
+      significantly increases the size of the responses. </t>
+
+      <t>This document defines a new record type, Trust DS (TDS), which
+      provides a mechanism very similar to the Child DS (CDS) <xref
+      target="RFC7344"/> record, and some practices for using it. Readers of
+      this document are expected to be familiar with the contents of <xref
+      target="RFC7344"/>. </t>
 
       <section title="Requirements notation">
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -79,10 +109,82 @@
       </section>
     </section>
 
-    <section title="Another section.">
-      <t>Template.</t>
+    <section title="TDS Record Format">
+      <t>The wire and presentation format of the Trust DS (TDS) resource
+      record is identical to the DS record <xref target="RFC4034"/>. </t>
+
+      <t>IANA has allocated RR code TBD for the TDS resource record via Expert
+      Review [DNS-TRANSPORT]. The TDS RR uses the same registries as DS for
+      its fields. No special processing is performed by authoritative servers
+      or by resolvers, when serving or resolving.</t>
+
+      <t>For all practical purposes, TDS is a regular RR type.</t>
+
+      <section title="TDS Owner Name">
+        <t>Much of the purpose of the mechanism described in this document is
+        to provide a mechanism to allow the trust anchor maintainer to
+        determine how widely deployed the trust anchor is, and who is using an
+        outdated trust anchor. This information is signalled from the
+        validating resolver to the authoritive server serving the zone in
+        which the Trust Anchor lives.</t>
+
+        <t>This information is available from looking at queries to DNS
+        servers serving the DNSKEY for the zone; each resolver using this
+        mechanism will periodically query the zone for a name encoding the
+        list of trust anchors it is using for that zone.</t>
+
+        <t>This name is computed as follows:<list style="numbers">
+            <t hangText="Step 1">Take the Key Tags of all of the DS records
+            corresponding to the TA(s) that the resolver knows / is using.</t>
+
+            <t hangText="Step 1">Sort this list in numerically ascending
+            order</t>
+
+            <t>Concatenate the list, separating each Key Tag with an
+            underscore ('_')</t>
+          </list>As an example, if the resolver has a single Trust Anchor with
+        a Key Tag of 4217, it would generate an owner name of 4217. If it has
+        two Trust Anchors, with Key Tags 4217 and 1776 it would generate an
+        owner name of 1776_4217. </t>
+
+        <t>NOTE: This generation of the TDS Name means that Key Tags MUST be
+        unique / must not repeat within "recent" history. If (e.g during a Key
+        Ceremony) a new DNSKEY is generated whose derived Key Tag collides
+        with an exiting one (statistically unlikely, but not impossible) this
+        DNSKEY MUST NOT be used, and a new DNSKEY MUST be generated.</t>
+      </section>
+    </section>
+
+    <section title="TDS Record Processing">
+      <t>A compliant recursive resolver will periodically (every 'Active
+      Refresh' interval (<xref target="RFC5011"/> Section 2.3)) query the
+      trust point domain for the TDS Owner Name. It will receive back either
+      an error (e.g NoError / NoData), or a TDS RRSet. It will validate the
+      TDS record, using standard DNSSEC logic. </t>
+
+      <t>Assuming a TDS RRSet is received and validates, the resolver will
+      parse the RRSet. The RRSet will contain one or more TDS records, listing
+      the DS records that correspond to DNSKEYs that may sign the zone. The
+      resolver SHOULD store this list to its configuration / persistent
+      storage. </t>
+
+      <t>[Ed note: See Appendix B for a worked example of performing a keyroll
+      using this mechanism. It's much less complex than this all makes it
+      sound...] </t>
 
       <t/>
+
+      <t>[Ed note - Corner cases. I didn't want to spend too long writing out
+      all of the handling for these until I've gotten some feedback on the
+      concept:]<list style="numbers">
+          <t>The TDS doesn't validate. This is the same as in a non-TDS /
+          RFC5011 world. You entered the TA incorrectly, you are under attack,
+          or similar.</t>
+
+          <t>There is no TDS record (you get NoError / NoData). You have
+          somehow become out of sync with the system, or someone has bungled
+          the keyroll in an odd way. Panicking is a good option here.</t>
+        </list></t>
     </section>
 
     <section title="IANA Considerations">
@@ -95,7 +197,11 @@
     </section>
 
     <section title="Acknowledgements">
-      <t>The authors wish to thank some folk.</t>
+      <t>This idea was discussed with Joe Abley, Paul Wouters, David Conrad
+      and Ed Lewis. I seem to remember mumbling it at a number of others too,
+      but have forgotten whom. Joe and Paul have agreed to co-author, but I
+      have not listed them yet, as I want them to read this first / not
+      surprise them.</t>
     </section>
   </middle>
 
@@ -103,19 +209,11 @@
     <references title="Normative References">
       <?rfc include='reference.RFC.2119'?>
 
-      <reference anchor="IANA.AS_Numbers"
-                 target="http://www.iana.org/assignments/as-numbers">
-        <front>
-          <title abbrev="Autonomous System (AS) Numbers">Autonomous System
-          (AS) Numbers</title>
+      <?rfc include='reference.RFC.4034'?>
 
-          <author>
-            <organization>IANA</organization>
-          </author>
+      <?rfc include='reference.RFC.5011'?>
 
-          <date/>
-        </front>
-      </reference>
+      <?rfc include='reference.RFC.7344'?>
     </references>
 
     <references title="Informative References">
@@ -130,6 +228,72 @@
       <t><list style="symbols">
           <t>Nothing changed in the template!</t>
         </list></t>
+    </section>
+
+    <section title="Worked example">
+      <t>This section provides an example of rolling the root trust anchor
+      from a DNSKEY with Key Tag 17 to one with Key Tag 42. It is written
+      informally, and will be tidied up / made more formal before publication.
+      To keep this readable, I've made key tags and hashes and such be
+      short.</t>
+
+      <t>The root trust anchor is RSA/SHA-1, generating a DS with SHA-1 the DS
+      works out to 17 5 1 111222 #(Tag RSA/SHA1 SHA1 Key). This DS is
+      installed into a root zone in a TDS record:</t>
+
+      <t>17 IN TDS 17 5 1 111222</t>
+
+      <t>Compliant resolvers are configured with this information, by manually
+      placing this in thier config files (in the same way resolvers are
+      currently manually configred with the DNSKEY). The resolver will
+      periodically query the root for qname 17, type TDS. It will receive (and
+      validate!) this TDS record, will see that is has this key, and will go
+      back to sleep. The root TA maintainer can see that everyone is using the
+      key with ID 17. </t>
+
+      <t>Eventually the trust anchor maintainer withes to roll to a new
+      DSA/SHA-1 key, so they generate the new key. They compute the DS (again
+      using SHA-1) and the computed DS is 42 (Tag) 3 (DSA/SHA-1) 1 (SHA1)
+      333444. They now publish TDS records as follows:</t>
+
+      <t><figure>
+          <artwork><![CDATA[17    IN TDS 17 5 1 111222
+      IN TDS 42 3 1 333444
+
+17_42 IN TDS 17 5 1 111222
+      IN TDS 42 3 1 333444]]></artwork>
+        </figure>A resolver who only knows about Key 17 queries for 17 and
+      will now start getting 2 TDS records and will see that this does not
+      match what is has configured, and so will add the 42 DS record to its
+      configured list of acceptable keys (now it has 17 and 42).</t>
+
+      <t>On its next scheduled check it will lookup 17_42 and see that it is
+      "in sync" and will go back to sleep. The trust anchor maintainer will
+      observe resolvers change from quering for 17 to querying for 17_42.
+      Hopefully everyone will end up querying for 17_42, but the maintainer
+      can observe who is still asking for 17 and trobleshoot with them to see
+      why they have not updated yet. At some point (99.9%?), the maintainer
+      will decide enough people have moved and can now start using the new
+      key, by adding it to the DNSKEY set (if they are really brave /
+      concerned about MTU they could just start using it instead of the old
+      key).</t>
+
+      <t>The maintainer would now like to stop using the old key. They now
+      publish:<figure>
+          <artwork><![CDATA[17_42 IN TDS 42 3 1 333444
+
+42 IN TDS 42 3 1 333444
+]]></artwork>
+        </figure></t>
+
+      <t>Resolvers will query for 17_42 and only receive the Key 42 record.
+      They will then remove the Key 17 record from thier config, leaving only
+      Key 42. They will then start querying just for 42, and see that they are
+      now in symnc.</t>
+
+      <t>Remember: The DS records in the TDS RRSet define the entire set that
+      the trust anchor maintainer would like resolver operator to use for that
+      trust point.</t>
     </section>
   </back>
 </rfc>
