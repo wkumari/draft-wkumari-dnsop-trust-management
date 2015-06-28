@@ -43,7 +43,7 @@
       </address>
     </author>
 
-    <date day="26" month="June" year="2015"/>
+    <date day="28" month="June" year="2015"/>
 
     <area>template</area>
 
@@ -71,9 +71,9 @@
       etc. They will be removed before publication.]</t>
 
       <t>[ This document is being collaborated on in Github at:
-      https://github.com/wkumari/&lt;TEMPLATE&gt;. The most recent version of
-      the document, open issues, etc should all be available here. The authors
-      (gratefully) accept pull requests ]</t>
+      https://github.com/wkumari/draft-wkumari-dnsop-trust-management. The
+      most recent version of the document, open issues, etc should all be
+      available here. The authors (gratefully) accept pull requests ]</t>
     </abstract>
   </front>
 
