@@ -6,20 +6,23 @@
 
 template                                                       W. Kumari
 Internet-Draft                                                    Google
-Intended status: Informational                             June 26, 2015
-Expires: December 28, 2015
+Intended status: Informational                             June 29, 2015
+Expires: December 31, 2015
 
 
        Simplified Updates of DNS Security (DNSSEC) Trust Anchors
-                  draft-wkumari-dnsop-trust-management
+                draft-wkumari-dnsop-trust-management-00
 
 Abstract
 
    This document describes a simple means for automated updating of
    DNSSEC trust anchors.  This mechanism allows the trust anchor
    maintainer to monitor the progress of the migration to the new trust
-   anchor, and so predict the effect before decommisioning the existing
+   anchor, and so predict the effect before decommissioning the existing
    trust anchor.
+
+   It is primarily aimed at the root DNSSEC trust anchor, but should be
+   applicable to trust anchors elsewhere in the DNS as well.
 
    [ Ed note - informal summary: One of the big issues with rolling the
    root key is that it is unclear who all is using RFC5011, who all has
@@ -29,43 +32,45 @@ Abstract
    potentially blowing the MTU limit.  This document describes a method
    that is basically CDS, but for the root key (or any other trust
    anchor).  Unlike the CDS record though, this record lives at a
-   special name that communicates what all TAs the recursive knows.
-   This allows the TA maintainer to predict how many, and who all will
-   break...]
+   special name - by querying for this name, the recursive exposes its
+   list of TAs to the auth server (signalling upstream) . This allows
+   the TA maintainer to predict how many, and who all will break.  It
+   also allows the pre-publication of a key before using it, and so
+   avoids the need to double response sizes...]
 
    [ Ed note: Text inside square brackets ([]) is additional background
    information, answers to frequently asked questions, general musings,
    etc.  They will be removed before publication.]
 
    [ This document is being collaborated on in Github at:
-   https://github.com/wkumari/<TEMPLATE>.  The most recent version of
-   the document, open issues, etc should all be available here.  The
-   authors (gratefully) accept pull requests ]
+   https://github.com/wkumari/draft-wkumari-dnsop-trust-management.  The
+   most recent version of the document, open issues, etc should all be
+   available here.  The authors (gratefully) accept pull requests ]
 
 Status of This Memo
 
    This Internet-Draft is submitted in full conformance with the
    provisions of BCP 78 and BCP 79.
 
+
+
+
+Kumari                  Expires December 31, 2015               [Page 1]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
+
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
    Drafts is at http://datatracker.ietf.org/drafts/current/.
-
-
-
-
-Kumari                  Expires December 28, 2015               [Page 1]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
-
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 28, 2015.
+   This Internet-Draft will expire on December 31, 2015.
 
 Copyright Notice
 
@@ -84,20 +89,32 @@ Copyright Notice
 
 Table of Contents
 
-   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
      1.1.  Requirements notation . . . . . . . . . . . . . . . . . .   3
    2.  TDS Record Format . . . . . . . . . . . . . . . . . . . . . .   3
      2.1.  TDS Owner Name  . . . . . . . . . . . . . . . . . . . . .   3
    3.  TDS Record Processing . . . . . . . . . . . . . . . . . . . .   4
    4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
    5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   6.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   5
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .   5
+   6.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .   6
    Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   6
-   Appendix B.  Worked example . . . . . . . . . . . . . . . . . . .   6
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   7
+   Appendix B.  Worked example . . . . . . . . . . . . . . . . . . .   7
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   8
+
+
+
+
+
+
+
+Kumari                  Expires December 31, 2015               [Page 2]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
 
 1.  Introduction
 
@@ -107,18 +124,9 @@ Table of Contents
    anchor may need to be replaced or "rolled", to a new key (potentially
    with a different algorithm, different key length, etc.).
 
-
-
-
-
-Kumari                  Expires December 28, 2015               [Page 2]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
-
-
    [RFC5011] provides a secure mechanism to do this, but operational
    experience has demonstrated a need for some additional functionality
-   that was not forseen.
+   that was not foreseen.
 
    During the recent effort to roll the IANA DNSSEC "root key", it has
    become clear that, in order to predict (and minimize) outages caused
@@ -155,7 +163,16 @@ Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
    provide a mechanism to allow the trust anchor maintainer to determine
    how widely deployed the trust anchor is, and who is using an outdated
    trust anchor.  This information is signalled from the validating
-   resolver to the authoritive server serving the zone in which the
+
+
+
+
+Kumari                  Expires December 31, 2015               [Page 3]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
+
+   resolver to the authoritative server serving the zone in which the
    Trust Anchor lives.
 
    This information is available from looking at queries to DNS servers
@@ -165,32 +182,29 @@ Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
 
    This name is computed as follows:
 
-
-
-Kumari                  Expires December 28, 2015               [Page 3]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
-
-
    1.  Take the Key Tags of all of the DS records corresponding to the
        TA(s) that the resolver knows / is using.
 
    2.  Sort this list in numerically ascending order
 
-   3.  Concatenate the list, separating each Key Tag with an underscore
-       ('_')
+   3.  Concatenate the list, separating each Key Tag with a hyphen
+       ('-'), then append this to an underscore ('_')
 
    As an example, if the resolver has a single Trust Anchor with a Key
-   Tag of 4217, it would generate an owner name of 4217.  If it has two
-   Trust Anchors, with Key Tags 4217 and 1776 it would generate an owner
-   name of 1776_4217.
+   Tag of 4217, it would generate an owner name of _4217.  If it has two
+   Trust Anchors, with Key Tags 1985 and 1776 it would generate an owner
+   name of _1776-1985.
 
-   NOTE: This generation of the TDS Name means that Key Tags MUST be
-   unique / must not repeat within "recent" history.  If (e.g during a
-   Key Ceremony) a new DNSKEY is generated whose derived Key Tag
-   collides with an exiting one (statistically unlikely, but not
-   impossible) this DNSKEY MUST NOT be used, and a new DNSKEY MUST be
-   generated.
+   NOTE: The generation of the TDS Name means that Key Tags MUST be
+   unique, at least within "recent" history.  If (e.g during a Key
+   Ceremony) a new DNSKEY is generated whose derived Key Tag collides
+   with an exiting one (statistically unlikely, but not impossible) this
+   DNSKEY MUST NOT be used, and a new DNSKEY MUST be generated. [ Ed
+   note: This is to prevent two successive keys having the same keytag
+   (e.g: 123), and then seeing "_123." - which 123 key was that?!
+   RFC4034 Appendix B admonition: "Implementations MUST NOT assume that
+   the key tag uniquely identifies a DNSKEY RR" - I think that is for
+   validators though.]
 
 3.  TDS Record Processing
 
@@ -206,6 +220,14 @@ Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
    zone.  The resolver SHOULD store this list to its configuration /
    persistent storage.
 
+
+
+
+Kumari                  Expires December 31, 2015               [Page 4]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
+
    [Ed note: See Appendix B for a worked example of performing a keyroll
    using this mechanism.  It's much less complex than this all makes it
    sound...]
@@ -220,36 +242,59 @@ Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
 
    2.  There is no TDS record (you get NoError / NoData).  You have
        somehow become out of sync with the system, or someone has
-
-
-
-Kumari                  Expires December 28, 2015               [Page 4]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
-
-
        bungled the keyroll in an odd way.  Panicking is a good option
        here.
 
 4.  IANA Considerations
 
-   This document contains no IANA considerations.Template: Fill this in!
+   [ Ed note: This is largely a place holder.  The real IANA
+   considerations section will require updating things like the DPS,
+   etc.  ]
+
+   The generation of the TDS Name means that Key Tags MUST be unique, at
+   least within an interval.  If, during a Key Ceremony, a new DNSKEY is
+   generated whose derived Key Tag collides with an exiting one
+   (statistically unlikely, but not impossible) this DNSKEY MUST NOT be
+   used, and a new DNSKEY MUST be generated.
+
+   There will need to be some text added to the DNSSEC Ceremony to
+   handle this.
+
+   In addition, the IANA is instructed to publish a TDS record
+   containing all trust anchors that are to be considered "trusted" for
+   the root key, with owner names as described above.
 
 5.  Security Considerations
 
-   TODO: Fill this out!
+   [ Ed note: a placeholder as well ]
 
-6.  Acknowledgements
+   This mechanism can be used to roll from one trusted (whatever that
+   means) to a new key.  It cannot, and should not be used to recover
+   from a (suspected) compromised key (this is true for RFC5011 as
+   well).
 
-   This idea was discussed with Joe Abley, Paul Wouters, David Conrad
-   and Ed Lewis.  I seem to remember mumbling it at a number of others
-   too, but have forgotten whom.  Joe and Paul have agreed to co-author,
-   but I have not listed them yet, as I want them to read this first /
-   not surprise them.
+   This relies upon the strength of the hashing algorithm in the DS.
 
-7.  References
 
-7.1.  Normative References
+
+
+
+Kumari                  Expires December 31, 2015               [Page 5]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
+
+6.  Contributors
+
+   A number of people contributed significantly to this document,
+   including Joe Abley, Paul Wouters, Paul Hoffman.  Wes Hardaker and
+   David Conrad.
+
+7.  Acknowledgements
+
+8.  References
+
+8.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
@@ -265,32 +310,35 @@ Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
               DNSSEC Delegation Trust Maintenance", RFC 7344, September
               2014.
 
-7.2.  Informative References
+8.2.  Informative References
 
    [I-D.ietf-sidr-iana-objects]
               Manderson, T., Vegoda, L., and S. Kent, "RPKI Objects
               issued by IANA", draft-ietf-sidr-iana-objects-03 (work in
               progress), May 2011.
 
-
-
-
-
-
-
-
-Kumari                  Expires December 28, 2015               [Page 5]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
-
-
 Appendix A.  Changes / Author Notes.
 
    [RFC Editor: Please remove this section before publication ]
 
-   From -00 to -01.
+   From -00.1 to -00 (published):
 
-   o  Nothing changed in the template!
+      Integrated comments and feedback from DRC and Paul Hoffman.
+
+      Use _ as a prefix to make clear it is meta-type (drc)
+
+   From -00.0 to -00.1
+
+   o  Initial draft, written in an airport lounge.
+
+
+
+
+
+Kumari                  Expires December 31, 2015               [Page 6]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
 
 Appendix B.  Worked example
 
@@ -304,7 +352,7 @@ Appendix B.  Worked example
    works out to 17 5 1 111222 #(Tag RSA/SHA1 SHA1 Key).  This DS is
    installed into a root zone in a TDS record:
 
-   17 IN TDS 17 5 1 111222
+   _17 IN TDS 17 5 1 111222
 
    Compliant resolvers are configured with this information, by manually
    placing this in thier config files (in the same way resolvers are
@@ -314,34 +362,26 @@ Appendix B.  Worked example
    will go back to sleep.  The root TA maintainer can see that everyone
    is using the key with ID 17.
 
-   Eventually the trust anchor maintainer withes to roll to a new DSA/
-   SHA-1 key, so they generate the new key.  They compute the DS (again
-   using SHA-1) and the computed DS is 42 (Tag) 3 (DSA/SHA-1) 1 (SHA1)
-   333444.  They now publish TDS records as follows:
+   Eventually the trust anchor maintainer withes to roll to a new RSA/
+   SHA-256 key, so they generate the new key.  They compute the DS
+   (using SHA-256) and the computed DS is 42 (Tag) 8 (RSA/SHA-256) 2
+   (SHA-256) 333444.  They now publish TDS records as follows:
 
-   17    IN TDS 17 5 1 111222
-         IN TDS 42 3 1 333444
+   _17    IN TDS 17 5 1 111222
+         IN TDS 42 8 2 333444
 
-   17_42 IN TDS 17 5 1 111222
-         IN TDS 42 3 1 333444
+   _17-42 IN TDS 17 5 1 111222
+         IN TDS 42 8 2 333444
 
    A resolver who only knows about Key 17 queries for 17 and will now
    start getting 2 TDS records and will see that this does not match
    what is has configured, and so will add the 42 DS record to its
    configured list of acceptable keys (now it has 17 and 42).
 
-   On its next scheduled check it will lookup 17_42 and see that it is
+   On its next scheduled check it will lookup _17-42 and see that it is
    "in sync" and will go back to sleep.  The trust anchor maintainer
-
-
-
-Kumari                  Expires December 28, 2015               [Page 6]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
-
-
    will observe resolvers change from quering for 17 to querying for
-   17_42.  Hopefully everyone will end up querying for 17_42, but the
+   _17-42.  Hopefully everyone will end up querying for _17-42, but the
    maintainer can observe who is still asking for 17 and trobleshoot
    with them to see why they have not updated yet.  At some point
    (99.9%?), the maintainer will decide enough people have moved and can
@@ -349,17 +389,23 @@ Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
    are really brave / concerned about MTU they could just start using it
    instead of the old key).
 
+
+
+Kumari                  Expires December 31, 2015               [Page 7]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management         June 2015
+
+
    The maintainer would now like to stop using the old key.  They now
    publish:
 
-   17_42 IN TDS 42 3 1 333444
+   _17-42 IN TDS 42 8 2 333444
+   _42 IN TDS 42 8 2 333444
 
-   42 IN TDS 42 3 1 333444
-
-   Resolvers will query for 17_42 and only receive the Key 42 record.
+   Resolvers will query for _17-42 and only receive the Key 42 record.
    They will then remove the Key 17 record from thier config, leaving
    only Key 42.  They will then start querying just for 42, and see that
-   they are now in symnc.
+   they are now in sync.
 
    Remember: The DS records in the TDS RRSet define the entire set that
    the trust anchor maintainer would like resolver operator to use for
@@ -391,5 +437,15 @@ Author's Address
 
 
 
-Kumari                  Expires December 28, 2015               [Page 7]
+
+
+
+
+
+
+
+
+
+
+Kumari                  Expires December 31, 2015               [Page 8]
 ```
