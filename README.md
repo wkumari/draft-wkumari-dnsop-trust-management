@@ -6,8 +6,9 @@
 
 template                                                       W. Kumari
 Internet-Draft                                                    Google
-Intended status: Informational                        September 25, 2015
-Expires: March 28, 2016
+Intended status: Informational                                 G. Huston
+Expires: March 28, 2016                                            APNIC
+                                                      September 25, 2015
 
 
            Signalling of DNS Security (DNSSEC) Trust Anchors
@@ -16,7 +17,7 @@ Expires: March 28, 2016
 Abstract
 
    [ Editor note: This originally included a mechanism to actually roll
-   the keys (like 5011 does), but feedback from the Prague meeting
+   the keys (like RFC5011 does), but feedback from the Prague meeting
    indicated a strong preference for signalling only. ]
 
    This document describes a simple method for validating recursive
@@ -54,8 +55,7 @@ Abstract
 
 
 
-
-Kumari                   Expires March 28, 2016                 [Page 1]
+Kumari & Huston          Expires March 28, 2016                 [Page 1]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
@@ -111,12 +111,12 @@ Table of Contents
 
 
 
-Kumari                   Expires March 28, 2016                 [Page 2]
+Kumari & Huston          Expires March 28, 2016                 [Page 2]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   7
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
 
 1.  Introduction
 
@@ -167,7 +167,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
 
-Kumari                   Expires March 28, 2016                 [Page 3]
+Kumari & Huston          Expires March 28, 2016                 [Page 3]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
@@ -223,7 +223,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
 
-Kumari                   Expires March 28, 2016                 [Page 4]
+Kumari & Huston          Expires March 28, 2016                 [Page 4]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
@@ -279,7 +279,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
 
-Kumari                   Expires March 28, 2016                 [Page 5]
+Kumari & Huston          Expires March 28, 2016                 [Page 5]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
@@ -335,7 +335,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
 
-Kumari                   Expires March 28, 2016                 [Page 6]
+Kumari & Huston          Expires March 28, 2016                 [Page 6]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
@@ -351,17 +351,25 @@ Appendix A.  Changes / Author Notes.
 
    [RFC Editor: Please remove this section before publication ]
 
+   From -00 to -01.1:
+
+   o  Ripped all the actual keyroll logic out.
+
+   o  Added Geoff as author.
+
+   o  Added some limitations and known issues.
+
    From -00.1 to -00 (published):
 
-      Integrated comments and feedback from DRC and Paul Hoffman.
+   o  Integrated comments and feedback from DRC and Paul Hoffman.
 
-      Use _ as a prefix to make clear it is meta-type (drc)
+   o  Use _ as a prefix to make clear it is meta-type (drc)
 
    From -00.0 to -00.1
 
    o  Initial draft, written in an airport lounge.
 
-Author's Address
+Authors' Addresses
 
    Warren Kumari
    Google
@@ -372,24 +380,16 @@ Author's Address
    Email: warren@kumari.net
 
 
+   Geoff Huston
+   APNIC
+   6 Cordelia St
+   South Brisbane QLD  4001
+   AUS
+
+   Email: gih@apnic.net
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Kumari                   Expires March 28, 2016                 [Page 7]
+Kumari & Huston          Expires March 28, 2016                 [Page 7]
 ```
