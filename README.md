@@ -94,16 +94,16 @@ Table of Contents
    2.  TDS Record Format . . . . . . . . . . . . . . . . . . . . . .   3
      2.1.  TDS Owner Name  . . . . . . . . . . . . . . . . . . . . .   3
    3.  TDS Record Processing . . . . . . . . . . . . . . . . . . . .   4
-   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   6.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   5
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   5
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .   6
-   Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   6
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   6
-
+   4.  Known issues and limitations  . . . . . . . . . . . . . . . .   5
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   7.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
+   Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   7
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   7
 
 
 
@@ -188,10 +188,14 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
    4.  Concatenate the list, with each key tag being a label.
 
-   As an example, if the resolver has a single Trust Anchor with a Key
-   Tag of 4217, it would generate an owner name of _4217.  If it has two
-   Trust Anchors, with Key Tags 1985 and 1776 it would generate an owner
-   name of _1776._1985.
+   5.  Append _tds.<domain>
+
+   As an example, if the resolver has a single Trust Anchor configured
+   for the root with a Key Tag of 4217, it would emit a query for
+   _4217._tds.  If it has two Trust Anchors, with Key Tags 1985 and 1776
+   it would generate an owner name of _1776._1985._tds.  If there is a
+   separate Trust Anchor configured for example.com with a key ID of
+   1234, the resolver would query for _1234._tds.example.com.
 
    NOTE: The generation of the TDS Name means that Key Tags MUST be
    unique, at least within "recent" history.  If (e.g during a Key
@@ -208,17 +212,13 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
    When a compliant recursive resolver performs the "Active Refresh"
    query at port of its RFC5011 ([RFC5011] Section 2.3)) processing it
-   will also send a TDS query for the TDS Owner Name.
+   will also send a TDS query for the TDS Owner Name.  This SHOULD be
+   hte default for complaint resolvers.
 
    It will receive back either an error (e.g NoError / NoData), or a
    (nonsencial) answer.  The entire purpose of this query is to signal
    the list of trust anchors that the recursive reolver knows about to
    the nameservers that serve the zone containing the TA.  This means
-   that the response to the query contains no useful information and
-   MUST be ignored.
-
-
-
 
 
 
@@ -228,7 +228,41 @@ Kumari                   Expires March 28, 2016                 [Page 4]
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
-4.  IANA Considerations
+   that the response to the query contains no useful information and
+   MUST be ignored.
+
+4.  Known issues and limitations
+
+   This solution only provides visibility from compliant resolvers, no
+   information is provided from legacy resolvers, or from those who
+   choose to disable this functionality.
+
+   In addition, the TA operator has no way to disambiguate a query that
+   is emmitted by the resolver itself, versus a query that is forwarded
+   through the resolver.  An attacker could also spoof quries of this
+   form to trick the TA operator.
+
+   This solution is designed to provide a rough idea of who will not
+   break during a key rollover, not perfect visibility.
+
+   [ Open Questions:
+
+   1: In order to disambiguate queries from resolvers versus those
+   forwarded through resolvers (or being recursed because of users
+   behind the resolver) we *could* add craziness like having resolvers
+   include ephemeral UUIDs or something...).  Is this worth doing?
+   (Personally I think not...)
+
+   2: We *could* also specify that compliant resolvers MUST NOT forward
+   queries of type TDS to try limit this.  Worth doing?  This is some of
+   the reason for having a defined type.
+
+   3: The authorative server *could* return a record with a long TTL to
+   stop queries (if it knows that it is not doing a rollover in the near
+   future).  This seems like a simple option, worth doing?  (I think
+   so).  ]
+
+5.  IANA Considerations
 
    [ Ed note: This is largely a place holder.  The real IANA
    considerations section will require updating things like the DPS,
@@ -243,7 +277,14 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    There will need to be some text added to the DNSSEC Ceremony to
    handle this.
 
-5.  Security Considerations
+
+
+Kumari                   Expires March 28, 2016                 [Page 5]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+
+
+6.  Security Considerations
 
    [ Ed note: a placeholder as well ]
 
@@ -256,33 +297,22 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    require the attacker to have factored the private key.  This seems
    farfetched....
 
-6.  Contributors
+7.  Contributors
 
    A number of people contributed significantly to this document,
    including Joe Abley, Paul Wouters, Paul Hoffman.  Wes Hardaker and
    David Conrad.
 
-7.  Acknowledgements
+8.  Acknowledgements
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, DOI 10.17487/
               RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
-
-
-
-
-
-
-
-Kumari                   Expires March 28, 2016                 [Page 5]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
-
 
    [RFC4034]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
               Rose, "Resource Records for the DNS Security Extensions",
@@ -298,7 +328,19 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
               10.17487/RFC7344, September 2014,
               <http://www.rfc-editor.org/info/rfc7344>.
 
-8.2.  Informative References
+
+
+
+
+
+
+
+Kumari                   Expires March 28, 2016                 [Page 6]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+
+
+9.2.  Informative References
 
    [I-D.ietf-sidr-iana-objects]
               Manderson, T., Vegoda, L., and S. Kent, "RPKI Objects
@@ -335,5 +377,19 @@ Author's Address
 
 
 
-Kumari                   Expires March 28, 2016                 [Page 6]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Kumari                   Expires March 28, 2016                 [Page 7]
 ```

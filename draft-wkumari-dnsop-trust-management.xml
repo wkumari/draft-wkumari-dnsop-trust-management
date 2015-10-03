@@ -144,11 +144,15 @@
 
             <t>Prepend an underscore ('_') to each Key Tag</t>
 
-            <t>Concatenate the list, with each key tag being a label.</t>
-          </list>As an example, if the resolver has a single Trust Anchor with
-        a Key Tag of 4217, it would generate an owner name of _4217. If it has
-        two Trust Anchors, with Key Tags 1985 and 1776 it would generate an
-        owner name of _1776._1985.</t>
+            <t>Concatenate the list, with each key tag being a label. </t>
+
+            <t>Append _tds.&lt;domain&gt;</t>
+          </list>As an example, if the resolver has a single Trust Anchor
+        configured for the root with a Key Tag of 4217, it would emit a query
+        for _4217._tds. If it has two Trust Anchors, with Key Tags 1985 and
+        1776 it would generate an owner name of _1776._1985._tds. If there is
+        a separate Trust Anchor configured for example.com with a key ID of
+        1234, the resolver would query for _1234._tds.example.com.</t>
 
         <t>NOTE: The generation of the TDS Name means that Key Tags MUST be
         unique, at least within "recent" history. If (e.g during a Key
@@ -166,7 +170,8 @@
     <section title="TDS Record Processing">
       <t>When a compliant recursive resolver performs the "Active Refresh"
       query at port of its RFC5011 (<xref target="RFC5011"/> Section 2.3))
-      processing it will also send a TDS query for the TDS Owner Name.</t>
+      processing it will also send a TDS query for the TDS Owner Name. This
+      SHOULD be hte default for complaint resolvers.</t>
 
       <t>It will receive back either an error (e.g NoError / NoData), or a
       (nonsencial) answer. The entire purpose of this query is to signal the
@@ -174,6 +179,37 @@
       nameservers that serve the zone containing the TA. This means that the
       response to the query contains no useful information and MUST be
       ignored.</t>
+    </section>
+
+    <section title="Known issues and limitations">
+      <t>This solution only provides visibility from compliant resolvers, no
+      information is provided from legacy resolvers, or from those who choose
+      to disable this functionality. </t>
+
+      <t>In addition, the TA operator has no way to disambiguate a query that
+      is emmitted by the resolver itself, versus a query that is forwarded
+      through the resolver. An attacker could also spoof quries of this form
+      to trick the TA operator.</t>
+
+      <t>This solution is designed to provide a rough idea of who will not
+      break during a key rollover, not perfect visibility. </t>
+
+      <t>[ Open Questions:</t>
+
+      <t>1: In order to disambiguate queries from resolvers versus those
+      forwarded through resolvers (or being recursed because of users behind
+      the resolver) we *could* add craziness like having resolvers include
+      ephemeral UUIDs or something...). Is this worth doing? (Personally I
+      think not...)</t>
+
+      <t>2: We *could* also specify that compliant resolvers MUST NOT forward
+      queries of type TDS to try limit this. Worth doing? This is some of the
+      reason for having a defined type.</t>
+
+      <t>3: The authorative server *could* return a record with a long TTL to
+      stop queries (if it knows that it is not doing a rollover in the near
+      future). This seems like a simple option, worth doing? (I think so).
+      ]</t>
     </section>
 
     <section title="IANA Considerations">
