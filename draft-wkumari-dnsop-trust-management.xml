@@ -156,7 +156,7 @@
         name encoding the list of trust anchors it is using for that zone.</t>
 
         <t>The owner name is computed as follows:<list style="numbers">
-            <t hangText="Step 1">Take the Key Tags of all of the DS records
+            <t hangText="Step 1">Take the Key Tags of all of the valid keys 
             corresponding to the TA(s) that the resolver knows / is using.</t>
 
             <t hangText="Step 1">Sort this list in numerically ascending
@@ -189,9 +189,9 @@
 
     <section title="TDS Record Processing">
       <t>When a compliant recursive resolver performs the "Active Refresh"
-      query at port of its RFC5011 (<xref target="RFC5011"/> Section 2.3))
+      query as part of its RFC5011 (<xref target="RFC5011"/> Section 2.3))
       processing it will also send a TDS query for the TDS Owner Name. This
-      SHOULD be hte default for complaint resolvers.</t>
+      SHOULD be the default for complaint resolvers.</t>
 
       <t>It will receive back either an error (e.g NoError / NoData), or a
       (nonsencial) answer. The entire purpose of this query is to signal the
