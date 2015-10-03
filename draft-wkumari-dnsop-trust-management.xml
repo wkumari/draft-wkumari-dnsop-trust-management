@@ -43,6 +43,24 @@
       </address>
     </author>
 
+    <author fullname="Geoff Huston" initials="G." surname="Huston">
+      <organization>APNIC</organization>
+
+      <address>
+        <postal>
+          <street>6 Cordelia St</street>
+
+          <city>South Brisbane QLD</city>
+
+          <code>4001</code>
+
+          <country>AUS</country>
+        </postal>
+
+        <email>gih@apnic.net</email>
+      </address>
+    </author>
+
     <date day="25" month="September" year="2015"/>
 
     <area>template</area>
@@ -51,7 +69,7 @@
 
     <abstract>
       <t>[ Editor note: This originally included a mechanism to actually roll
-      the keys (like 5011 does), but feedback from the Prague meeting
+      the keys (like RFC5011 does), but feedback from the Prague meeting
       indicated a strong preference for signalling only. ]</t>
 
       <t>This document describes a simple method for validating recursive
@@ -68,9 +86,10 @@
       successfully fetched and installed the new key, and, most importantly,
       who all will die when the old key is revoked. By having resolvers query
       for a special QNAME, comprised of the list of TAs that it knows about,
-      we effectively signal "up stream" to the authoritative server. By querying for this name,
-      the recursive exposes its list of TAs to this authoritative server. This allows
-      the TA maintainer to gather information relating to the state of TAs on resolvers.]</t>
+      we effectively signal "up stream" to the authoritative server. By
+      querying for this name, the recursive exposes its list of TAs to this
+      authoritative server. This allows the TA maintainer to gather
+      information relating to the state of TAs on resolvers.]</t>
 
       <t>[ Ed note: Text inside square brackets ([]) is additional background
       information, answers to frequently asked questions, general musings,
@@ -144,7 +163,7 @@
 
             <t>Prepend an underscore ('_') to each Key Tag</t>
 
-            <t>Concatenate the list, with each key tag being a label. </t>
+            <t>Concatenate the list, with each key tag being a label.</t>
 
             <t>Append _tds.&lt;domain&gt;</t>
           </list>As an example, if the resolver has a single Trust Anchor
@@ -184,7 +203,7 @@
     <section title="Known issues and limitations">
       <t>This solution only provides visibility from compliant resolvers, no
       information is provided from legacy resolvers, or from those who choose
-      to disable this functionality. </t>
+      to disable this functionality.</t>
 
       <t>In addition, the TA operator has no way to disambiguate a query that
       is emmitted by the resolver itself, versus a query that is forwarded
@@ -192,7 +211,7 @@
       to trick the TA operator.</t>
 
       <t>This solution is designed to provide a rough idea of who will not
-      break during a key rollover, not perfect visibility. </t>
+      break during a key rollover, not perfect visibility.</t>
 
       <t>[ Open Questions:</t>
 
@@ -268,7 +287,15 @@
     <section title="Changes / Author Notes.">
       <t>[RFC Editor: Please remove this section before publication ]</t>
 
-      <t>From -00.1 to -00 (published):<list>
+      <t>From -00 to -01.1:<list style="symbols">
+          <t>Ripped all the actual keyroll logic out.</t>
+
+          <t>Added Geoff as author.</t>
+
+          <t>Added some limitations and known issues.</t>
+        </list></t>
+
+      <t>From -00.1 to -00 (published):<list style="symbols">
           <t>Integrated comments and feedback from DRC and Paul Hoffman.</t>
 
           <t>Use _ as a prefix to make clear it is meta-type (drc)</t>
