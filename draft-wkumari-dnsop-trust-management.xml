@@ -68,9 +68,9 @@
       successfully fetched and installed the new key, and, most importantly,
       who all will die when the old key is revoked. By having resolvers query
       for a special QNAME, comprised of the list of TAs that it knows about,
-      we effectively signal "up stream" to the TA. By querying for this name,
-      the recursive exposes its list of TAs to the auth server. This allows
-      the TA maintainer to predict how many, and who all will break.]</t>
+      we effectively signal "up stream" to the authoritative server. By querying for this name,
+      the recursive exposes its list of TAs to this authoritative server. This allows
+      the TA maintainer to gather information relating to the state of TAs on resolvers.]</t>
 
       <t>[ Ed note: Text inside square brackets ([]) is additional background
       information, answers to frequently asked questions, general musings,
@@ -95,7 +95,7 @@
       operational experience has demonstrated a need for some additional
       functionality that was not foreseen.</t>
 
-      <t>During the recent effort to roll the IANA DNSSEC "root key", it has
+      <t>During the current efforts to roll the IANA DNSSEC "root key", it has
       become clear that, in order to predict (and minimize) outages caused by
       rolling the key, one needs to know who does not have the new key.</t>
 
