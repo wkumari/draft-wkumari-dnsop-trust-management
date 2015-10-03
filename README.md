@@ -33,10 +33,11 @@ Abstract
    successfully fetched and installed the new key, and, most
    importantly, who all will die when the old key is revoked.  By having
    resolvers query for a special QNAME, comprised of the list of TAs
-   that it knows about, we effectively signal "up stream" to the TA.  By
-   querying for this name, the recursive exposes its list of TAs to the
-   auth server.  This allows the TA maintainer to predict how many, and
-   who all will break.]
+   that it knows about, we effectively signal "up stream" to the
+   authoritative server.  By querying for this name, the recursive
+   exposes its list of TAs to this authoritative server.  This allows
+   the TA maintainer to gather information relating to the state of TAs
+   on resolvers.]
 
    [ Ed note: Text inside square brackets ([]) is additional background
    information, answers to frequently asked questions, general musings,
@@ -47,10 +48,9 @@ Abstract
    most recent version of the document, open issues, etc should all be
    available here.  The authors (gratefully) accept pull requests ]
 
-Status of This Memo
 
-   This Internet-Draft is submitted in full conformance with the
-   provisions of BCP 78 and BCP 79.
+
+
 
 
 
@@ -59,6 +59,11 @@ Kumari                   Expires March 28, 2016                 [Page 1]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
 
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
@@ -103,11 +108,6 @@ Table of Contents
      9.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
    Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   7
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   7
-
-
-
-
 
 
 
@@ -115,6 +115,8 @@ Kumari                   Expires March 28, 2016                 [Page 2]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
+
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   7
 
 1.  Introduction
 
@@ -128,7 +130,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    experience has demonstrated a need for some additional functionality
    that was not foreseen.
 
-   During the recent effort to roll the IANA DNSSEC "root key", it has
+   During the current efforts to roll the IANA DNSSEC "root key", it has
    become clear that, in order to predict (and minimize) outages caused
    by rolling the key, one needs to know who does not have the new key.
 
@@ -162,8 +164,6 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    information is signalled from the validating resolver to the
    authoritative servers serving the zone in which the Trust Anchor
    lives.
-
-
 
 
 
