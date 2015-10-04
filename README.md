@@ -10,6 +10,8 @@ Intended status: Informational                                 G. Huston
 Expires: March 28, 2016                                            APNIC
                                                                  E. Hunt
                                              Internet Systems Consortium
+                                                               R. Arends
+                                                                   ICANN
                                                       September 25, 2015
 
 
@@ -50,8 +52,6 @@ Abstract
    https://github.com/wkumari/draft-wkumari-dnsop-trust-management.  The
    most recent version of the document, open issues, etc should all be
    available here.  The authors (gratefully) accept pull requests ]
-
-
 
 
 
@@ -386,7 +386,7 @@ Appendix A.  Changes / Author Notes.
 
    o  Ripped all the actual keyroll logic out.
 
-   o  Added Geoff as author.
+   o  Added Geoff, Evan and Roy as authors.
 
 
 
@@ -397,6 +397,8 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
    o  Added some limitations and known issues.
+
+   o  Renamed to TAT, added tag describing the state of the TA.
 
    From -00.1 to -00 (published):
 
@@ -445,7 +447,61 @@ Authors' Addresses
 
 
 
-
-
 Kumari, et al.           Expires March 28, 2016                 [Page 8]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+
+
+   Roy Arends
+   ICANN
+   12025 Waterfront Drive, Suite 300
+   Los Angeles, CA  90094-2536
+   US
+
+   Email: roy.arends@icann.org
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 9]
 ```
