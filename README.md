@@ -8,6 +8,8 @@ template                                                       W. Kumari
 Internet-Draft                                                    Google
 Intended status: Informational                                 G. Huston
 Expires: March 28, 2016                                            APNIC
+                                                                 E. Hunt
+                                             Internet Systems Consortium
                                                       September 25, 2015
 
 
@@ -53,9 +55,7 @@ Abstract
 
 
 
-
-
-Kumari & Huston          Expires March 28, 2016                 [Page 1]
+Kumari, et al.           Expires March 28, 2016                 [Page 1]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
@@ -96,35 +96,35 @@ Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
      1.1.  Requirements notation . . . . . . . . . . . . . . . . . .   3
-   2.  TDS Record Format . . . . . . . . . . . . . . . . . . . . . .   3
-     2.1.  TDS Owner Name  . . . . . . . . . . . . . . . . . . . . .   3
-   3.  TDS Record Processing . . . . . . . . . . . . . . . . . . . .   4
+   2.  Trust Anchor Telemetry Query  . . . . . . . . . . . . . . . .   3
+     2.1.  TAT Name Format . . . . . . . . . . . . . . . . . . . . .   4
+   3.  Sending the Trust Anchor Telemetry Query  . . . . . . . . . .   5
    4.  Known issues and limitations  . . . . . . . . . . . . . . . .   5
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
-   7.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   6
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+   7.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   7
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
      9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
    Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   7
 
 
 
-Kumari & Huston          Expires March 28, 2016                 [Page 2]
+Kumari, et al.           Expires March 28, 2016                 [Page 2]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
 
-   When a DNSSEC aware resolver performs validation, it requires a trust
+   When a DNSSEC-aware resolver performs validation, it requires a trust
    anchor to validate the DNSSEC chain.  An example of a trust anchor is
-   the so called DNSSEC "root key".  For a variety of reasons this trust
-   anchor may need to be replaced or "rolled", to a new key (potentially
-   with a different algorithm, different key length, etc.).
+   the so called DNSSEC "root key".  For a variety of reasons, this
+   trust anchor may need to be replaced or "rolled", to a new key
+   (potentially with a different algorithm, different key length, etc.).
 
    [RFC5011] provides a secure mechanism to do this, but operational
    experience has demonstrated a need for some additional functionality
@@ -132,13 +132,13 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
    During the current efforts to roll the IANA DNSSEC "root key", it has
    become clear that, in order to predict (and minimize) outages caused
-   by rolling the key, one needs to know who does not have the new key.
+   by rolling the key, real-time information about the uptake of the new
+   key will be needed.
 
-   This document defines a new record type, Trust Digest Signal (TDS),
-   which a machanism for validating resolvers to signal their configured
-   trust anchors, and some practices for using it.  Readers of this
-   document are expected to be familiar with the contents of [RFC7344]
-   and [RFC5011].
+   This document defines a mechanism ("trust anchor telemetry") by which
+   validating resolvers can provide information about their configured
+   trust anchors.  Readers of this document are expected to be familiar
+   with the contents of [RFC7344] and [RFC5011].
 
 1.1.  Requirements notation
 
@@ -146,104 +146,147 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
-2.  TDS Record Format
-
-   The TDS record does not really have a format, as it does not really
-   exist.  Instead it is simply a type that can be queried for, the
-   response is meaningless.
-
-   IANA has allocated RR code TBD for the TDS resource record via Expert
-   Review [DNS-TRANSPORT].  No special processing is performed by
-   authoritative servers or by resolvers, when serving or resolving.
-
-2.1.  TDS Owner Name
+2.  Trust Anchor Telemetry Query
 
    The purpose of the mechanism described in this document is to allow
    the trust anchor maintainer to determine how widely deployed a given
-   trust anchor is, and who is using an outdated trust anchor.  This
-   information is signalled from the validating resolver to the
-   authoritative servers serving the zone in which the Trust Anchor
-   lives.
+   trust anchor is.  This information is signaled from the validating
+   resolver to the authoritative servers serving the zone in which the
+   trust anchor lives by sending a periodic query to that zone.  The
+   query type of the TAT Query is NULL.  The query name is a TAT Owner
+   Name, a format which encodes the list of the trust anchors for that
+   zone that are currently in use by the validating resolver, and
+   optional metadata about each key.  Telemetry information can be
+   retrieved by the trust anchor maintainer by examining logged queries
+   that match the TAT Name format.
 
 
 
-Kumari & Huston          Expires March 28, 2016                 [Page 3]
+
+
+
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 3]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
-   This information is available from looking at queries to DNS servers
-   serving the DNSKEY record for the zone; each validating resolver
-   using this mechanism will periodically query the zone for a name
-   encoding the list of trust anchors it is using for that zone.
+2.1.  TAT Name Format
 
-   The owner name is computed as follows:
+   The TAT Name is generated as follows:
 
-   1.  Take the Key Tags of all of the DS records corresponding to the
-       TA(s) that the resolver knows / is using.
+   1.  For each trust anchor that the resolver knows and/or is using,
+       generate a string consisting of the key's Algorithm in decimal
+       format, followed by an underscore ('_'), followed by the derived
+       Key Tag in decimal format.  [NOTE: If we used hex, this could
+       just be AAKKKK, no need for a punctuation mark, but it would be
+       less human-readable.]
 
-   2.  Sort this list in numerically ascending order
+   2.  Follow each string with a character indicating the status of the
+       key from the resolver's point of view:
 
-   3.  Prepend an underscore ('_') to each Key Tag
+       S  Static trust anchor, not subject to [RFC5011]
 
-   4.  Concatenate the list, with each key tag being a label.
+       A  Accepted trust anchor
 
-   5.  Append _tds.<domain>
+       P  Pending trust anchor, not yet accepted
 
-   As an example, if the resolver has a single Trust Anchor configured
-   for the root with a Key Tag of 4217, it would emit a query for
-   _4217._tds.  If it has two Trust Anchors, with Key Tags 1985 and 1776
-   it would generate an owner name of _1776._1985._tds.  If there is a
-   separate Trust Anchor configured for example.com with a key ID of
-   1234, the resolver would query for _1234._tds.example.com.
+       R  Revoked trust anchor
 
-   NOTE: The generation of the TDS Name means that Key Tags MUST be
+   3.  Sort the list in numerically ascending order of Algorithm and Key
+       Tag.
+
+   4.  Concatenate the list, with each string used as a label in a
+       domain name.
+
+   5.  Append _tat.<domain>
+
+   Examples:
+
+   o  If the resolver has a single trust anchor statically configured
+      for the root zone, with an algorithm of RSASHA256 and a Key Tag of
+      19036, it would emit a query for 8_19036S._tat.
+
+   o  If the resolver were configured to use [RFC5011] trust anchor
+      management, it would send 8_19036A._tat.
+
+   o  If a new key with Key Tag 1999 was added to the root zone and had
+      been seen by the resolver, but was too recent to have been
+      accepted as a trust anchor, then the resolver would send a query
+      for 8_1999P.8_19036A._tat.  After the hold-down timer ([RFC5011]
+      Section 2.2) had expired, the resolver would send a query for
+      8_1999A.8_19036A._tat.
+
+
+
+
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 4]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+
+
+   o  If there is a separate static trust anchor configured for
+      example.com with an algorithm of RSASHA1 and a Key Tag of 1234,
+      the resolver would send a query for 5_1234S._tat.example.com.
+
+   NOTE: The format of the TAT Name requires that Key Tags MUST be
    unique, at least within "recent" history.  If (e.g during a Key
    Ceremony) a new DNSKEY is generated whose derived Key Tag collides
    with an exiting one (statistically unlikely, but not impossible) this
    DNSKEY MUST NOT be used, and a new DNSKEY MUST be generated. [ Ed
    note: This is to prevent two successive keys having the same keytag
-   (e.g: 123), and then seeing "_123." - which 123 key was that?!
+   (e.g: 123), and then seeing "8_123A." - which 123 key was that?!
    RFC4034 Appendix B admonition: "Implementations MUST NOT assume that
    the key tag uniquely identifies a DNSKEY RR", but this appears to be
-   targeted ad validating resolver implmentations.]
+   targeted at validating resolver implmentations.]
 
-3.  TDS Record Processing
+3.  Sending the Trust Anchor Telemetry Query
 
-   When a compliant recursive resolver performs the "Active Refresh"
-   query at port of its RFC5011 ([RFC5011] Section 2.3)) processing it
-   will also send a TDS query for the TDS Owner Name.  This SHOULD be
-   hte default for complaint resolvers.
+   When a compliant validating resolver performs the "Active Refresh"
+   query as part of its RFC5011 ([RFC5011] Section 2.3)) processing it
+   will also send a query for the TAT Name.  This SHOULD be the default
+   for compliant resolvers.
 
-   It will receive back either an error (e.g NoError / NoData), or a
-   (nonsencial) answer.  The entire purpose of this query is to signal
-   the list of trust anchors that the recursive reolver knows about to
-   the nameservers that serve the zone containing the TA.  This means
+   It will receive back either a negative response (e.g.  NXDOMAIN), or
+   a (nonsensical) answer.  As the entire purpose of this query is to
+   send information from a recursive resolver to the nameservers that
+   serve the zone containing a trust anchor, the response to the query
+   contains no useful information and MUST be ignored.
+
+4.  Known issues and limitations
+
+   This solution is designed to provide a rough idea of the rate of
+   uptake of a new key during a key rollover; perfect visibility is not
+   an achievable.  In particular:
+
+   1.  Only compliant resolvers will send telemetry queries; no
+       information is provided from legacy resolvers, or from those who
+       choose to disable this functionality.
+
+   2.  The trust anchor maintainer has no way to differentiate a query
+       that is emitted by the resolver itself from a query that is
+       forwarded through the resolver.  (Note, however, that forwarded
+       queries are likely to be infrequent; responses to TAT queries
+       will in most cases be negatively cached with an NXDOMAIN covering
+       the _TAT subdomain; subsequent queries will be answered from the
+       cache rather than forwarded to the trust anchor zone.)
 
 
 
 
-Kumari & Huston          Expires March 28, 2016                 [Page 4]
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 5]
 
 Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
-   that the response to the query contains no useful information and
-   MUST be ignored.
-
-4.  Known issues and limitations
-
-   This solution only provides visibility from compliant resolvers, no
-   information is provided from legacy resolvers, or from those who
-   choose to disable this functionality.
-
-   In addition, the TA operator has no way to disambiguate a query that
-   is emmitted by the resolver itself, versus a query that is forwarded
-   through the resolver.  An attacker could also spoof quries of this
-   form to trick the TA operator.
-
-   This solution is designed to provide a rough idea of who will not
-   break during a key rollover, not perfect visibility.
+   3.  An attacker could forge TAT queries to trick the trust anchor
+       maintainer into a false impression of the adoption rate of a new
+       trust anchor, if there were a perceived advantage to doing so.
 
    [ Open Questions:
 
@@ -260,7 +303,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    3: The authorative server *could* return a record with a long TTL to
    stop queries (if it knows that it is not doing a rollover in the near
    future).  This seems like a simple option, worth doing?  (I think
-   so).  ]
+   so).  (each thinks not.)
 
 5.  IANA Considerations
 
@@ -268,7 +311,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    considerations section will require updating things like the DPS,
    etc.  ]
 
-   The generation of the TDS Name means that Key Tags MUST be unique, at
+   The format of the TAT query requires that Key Tags MUST be unique, at
    least within an interval.  If, during a Key Ceremony, a new DNSKEY is
    generated whose derived Key Tag collides with an exiting one
    (statistically unlikely, but not impossible) this DNSKEY MUST NOT be
@@ -277,25 +320,25 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    There will need to be some text added to the DNSSEC Ceremony to
    handle this.
 
-
-
-Kumari & Huston          Expires March 28, 2016                 [Page 5]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
-
-
 6.  Security Considerations
 
    [ Ed note: a placeholder as well ]
 
-   This mechanism causes a recursove resolver to disclose the list of
-   Trust Anchors that it knows about to the authorative servers serving
+   This mechanism causes a recursive resolver to disclose the list of
+   trust anchors that it knows about to the authorative servers serving
    the zone containing the TA (or attackers able to monitor the path
    between these devices).  It is conceviable that an attacker may be
    able to use this to determine that a resolver trusts an outdated /
-   revoked trust anchor and perform a MitM attack This would also
+   revoked trust anchor and perform a MitM attack.  This would also
    require the attacker to have factored the private key.  This seems
    farfetched....
+
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 6]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+
 
 7.  Contributors
 
@@ -328,18 +371,6 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
               10.17487/RFC7344, September 2014,
               <http://www.rfc-editor.org/info/rfc7344>.
 
-
-
-
-
-
-
-
-Kumari & Huston          Expires March 28, 2016                 [Page 6]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
-
-
 9.2.  Informative References
 
    [I-D.ietf-sidr-iana-objects]
@@ -356,6 +387,14 @@ Appendix A.  Changes / Author Notes.
    o  Ripped all the actual keyroll logic out.
 
    o  Added Geoff as author.
+
+
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 7]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+
 
    o  Added some limitations and known issues.
 
@@ -389,7 +428,24 @@ Authors' Addresses
    Email: gih@apnic.net
 
 
+   Evan Hunt
+   Internet Systems Consortium
+   950 Charter St
+   Redwood City, CA  94063
+   US
+
+   Email: each@isc.org
 
 
-Kumari & Huston          Expires March 28, 2016                 [Page 7]
+
+
+
+
+
+
+
+
+
+
+Kumari, et al.           Expires March 28, 2016                 [Page 8]
 ```
