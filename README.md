@@ -7,12 +7,12 @@
 template                                                       W. Kumari
 Internet-Draft                                                    Google
 Intended status: Informational                                 G. Huston
-Expires: March 28, 2016                                            APNIC
+Expires: April 7, 2016                                             APNIC
                                                                  E. Hunt
                                              Internet Systems Consortium
                                                                R. Arends
                                                                    ICANN
-                                                      September 25, 2015
+                                                         October 5, 2015
 
 
            Signalling of DNS Security (DNSSEC) Trust Anchors
@@ -55,9 +55,9 @@ Abstract
 
 
 
-Kumari, et al.           Expires March 28, 2016                 [Page 1]
+Kumari, et al.            Expires April 7, 2016                 [Page 1]
 
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
 
 
 Status of This Memo
@@ -75,7 +75,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 28, 2016.
+   This Internet-Draft will expire on April 7, 2016.
 
 Copyright Notice
 
@@ -96,7 +96,7 @@ Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
      1.1.  Requirements notation . . . . . . . . . . . . . . . . . .   3
-   2.  Trust Anchor Telemetry Query  . . . . . . . . . . . . . . . .   3
+   2.  Trust Anchor Telemetry  . . . . . . . . . . . . . . . . . . .   3
      2.1.  TAT Name Format . . . . . . . . . . . . . . . . . . . . .   4
    3.  Sending the Trust Anchor Telemetry Query  . . . . . . . . . .   5
    4.  Known issues and limitations  . . . . . . . . . . . . . . . .   5
@@ -111,9 +111,9 @@ Table of Contents
 
 
 
-Kumari, et al.           Expires March 28, 2016                 [Page 2]
+Kumari, et al.            Expires April 7, 2016                 [Page 2]
 
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
 
 
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
@@ -146,19 +146,19 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
-2.  Trust Anchor Telemetry Query
+2.  Trust Anchor Telemetry
 
    The purpose of the mechanism described in this document is to allow
    the trust anchor maintainer to determine how widely deployed a given
    trust anchor is.  This information is signaled from the validating
    resolver to the authoritative servers serving the zone in which the
    trust anchor lives by sending a periodic query to that zone.  The
-   query type of the TAT Query is NULL.  The query name is a TAT Owner
-   Name, a format which encodes the list of the trust anchors for that
-   zone that are currently in use by the validating resolver, and
-   optional metadata about each key.  Telemetry information can be
-   retrieved by the trust anchor maintainer by examining logged queries
-   that match the TAT Name format.
+   query type of the TAT Query is NULL.  The query name is a TAT Name, a
+   format which encodes the list of the trust anchors for that zone that
+   are currently in use by the validating resolver, along with status
+   information about each key.  Telemetry information can be retrieved
+   by the trust anchor maintainer by examining logged queries that match
+   the TAT Name format.
 
 
 
@@ -167,9 +167,9 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
 
-Kumari, et al.           Expires March 28, 2016                 [Page 3]
+Kumari, et al.            Expires April 7, 2016                 [Page 3]
 
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
 
 
 2.1.  TAT Name Format
@@ -202,6 +202,12 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
    5.  Append _tat.<domain>
 
+   Assuming no more than two digits for the Algorithm and five for the
+   Key Tag, a TAT Name for the root zone can encode up to 24 trust
+   anchors. [ Someone should probably check my math.  QUESTION: Do we
+   need to specify what will happen in the crazy case of a resolver
+   having configured more than 24 trust anchors? -each ]
+
    Examples:
 
    o  If the resolver has a single trust anchor statically configured
@@ -214,26 +220,24 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    o  If a new key with Key Tag 1999 was added to the root zone and had
       been seen by the resolver, but was too recent to have been
       accepted as a trust anchor, then the resolver would send a query
+
+
+
+Kumari, et al.            Expires April 7, 2016                 [Page 4]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
+
+
       for 8_1999P.8_19036A._tat.  After the hold-down timer ([RFC5011]
       Section 2.2) had expired, the resolver would send a query for
       8_1999A.8_19036A._tat.
-
-
-
-
-
-
-Kumari, et al.           Expires March 28, 2016                 [Page 4]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
-
 
    o  If there is a separate static trust anchor configured for
       example.com with an algorithm of RSASHA1 and a Key Tag of 1234,
       the resolver would send a query for 5_1234S._tat.example.com.
 
    NOTE: The format of the TAT Name requires that Key Tags MUST be
-   unique, at least within "recent" history.  If (e.g during a Key
+   unique, at least within "recent" history.  If (e.g. during a Key
    Ceremony) a new DNSKEY is generated whose derived Key Tag collides
    with an exiting one (statistically unlikely, but not impossible) this
    DNSKEY MUST NOT be used, and a new DNSKEY MUST be generated. [ Ed
@@ -260,7 +264,7 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
    This solution is designed to provide a rough idea of the rate of
    uptake of a new key during a key rollover; perfect visibility is not
-   an achievable.  In particular:
+   achievable.  In particular:
 
    1.  Only compliant resolvers will send telemetry queries; no
        information is provided from legacy resolvers, or from those who
@@ -271,18 +275,17 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
        forwarded through the resolver.  (Note, however, that forwarded
        queries are likely to be infrequent; responses to TAT queries
        will in most cases be negatively cached with an NXDOMAIN covering
-       the _TAT subdomain; subsequent queries will be answered from the
-       cache rather than forwarded to the trust anchor zone.)
 
 
 
 
-
-
-Kumari, et al.           Expires March 28, 2016                 [Page 5]
+Kumari, et al.            Expires April 7, 2016                 [Page 5]
 
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
 
+
+       the _TAT subdomain; subsequent client queries would be answered
+       from the cache rather than forwarded to the trust anchor zone.)
 
    3.  An attacker could forge TAT queries to trick the trust anchor
        maintainer into a false impression of the adoption rate of a new
@@ -329,16 +332,17 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
    the zone containing the TA (or attackers able to monitor the path
    between these devices).  It is conceviable that an attacker may be
    able to use this to determine that a resolver trusts an outdated /
+
+
+
+Kumari, et al.            Expires April 7, 2016                 [Page 6]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
+
+
    revoked trust anchor and perform a MitM attack.  This would also
    require the attacker to have factored the private key.  This seems
    farfetched....
-
-
-
-Kumari, et al.           Expires March 28, 2016                 [Page 6]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
-
 
 7.  Contributors
 
@@ -384,17 +388,17 @@ Appendix A.  Changes / Author Notes.
 
    From -00 to -01.1:
 
+
+
+
+Kumari, et al.            Expires April 7, 2016                 [Page 7]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
+
+
    o  Ripped all the actual keyroll logic out.
 
    o  Added Geoff, Evan and Roy as authors.
-
-
-
-
-Kumari, et al.           Expires March 28, 2016                 [Page 7]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
-
 
    o  Added some limitations and known issues.
 
@@ -443,13 +447,9 @@ Authors' Addresses
 
 
 
-
-
-
-
-Kumari, et al.           Expires March 28, 2016                 [Page 8]
+Kumari, et al.            Expires April 7, 2016                 [Page 8]
 
-Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
 
 
    Roy Arends
@@ -503,5 +503,5 @@ Internet-Draft    draft-wkumari-dnsop-trust-management    September 2015
 
 
 
-Kumari, et al.           Expires March 28, 2016                 [Page 9]
+Kumari, et al.            Expires April 7, 2016                 [Page 9]
 ```

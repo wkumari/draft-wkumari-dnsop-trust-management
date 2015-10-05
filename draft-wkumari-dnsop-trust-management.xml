@@ -98,7 +98,7 @@
       </address>
     </author>
 
-    <date day="25" month="September" year="2015"/>
+    <date day="5" month="October" year="2015"/>
 
     <area>template</area>
 
@@ -176,12 +176,12 @@
       trust anchor is. This information is signaled from the validating
       resolver to the authoritative servers serving the zone in which the
       trust anchor lives by sending a periodic query to that zone. The query
-      type of the TAT Query is NULL. The query name is a TAT Name, a
-      format which encodes the list of the trust anchors for that zone that
-      are currently in use by the validating resolver, along with status
-      information about each key. Telemetry information can be retrieved
-      by the trust anchor maintainer by examining logged queries that
-      match the TAT Name format.</t>
+      type of the TAT Query is NULL. The query name is a TAT Name, a format
+      which encodes the list of the trust anchors for that zone that are
+      currently in use by the validating resolver, along with status
+      information about each key. Telemetry information can be retrieved by
+      the trust anchor maintainer by examining logged queries that match the
+      TAT Name format.</t>
 
       <section title="TAT Name Format">
         <t>The TAT Name is generated as follows:<list style="numbers">
@@ -213,11 +213,11 @@
             <t>Append _tat.&lt;domain&gt;</t>
           </list></t>
 
-        <t>Assuming no more than two digits for the Algorithm and five for
-        the Key Tag, a TAT Name for the root zone can encode up to 24 trust
-        anchors. [ Someone should probably check my math.  QUESTION: Do
-        we need to specify what will happen in the crazy case of a
-        resolver having configured more than 24 trust anchors? -each ]</t>
+        <t>Assuming no more than two digits for the Algorithm and five for the
+        Key Tag, a TAT Name for the root zone can encode up to 24 trust
+        anchors. [ Someone should probably check my math. QUESTION: Do we need
+        to specify what will happen in the crazy case of a resolver having
+        configured more than 24 trust anchors? -each ]</t>
 
         <t>Examples: <list style="symbols">
             <t>If the resolver has a single trust anchor statically configured
@@ -278,8 +278,8 @@
           forwarded through the resolver. (Note, however, that forwarded
           queries are likely to be infrequent; responses to TAT queries will
           in most cases be negatively cached with an NXDOMAIN covering the
-          _TAT subdomain; subsequent client queries would be answered from
-          the cache rather than forwarded to the trust anchor zone.)</t>
+          _TAT subdomain; subsequent client queries would be answered from the
+          cache rather than forwarded to the trust anchor zone.)</t>
 
           <t>An attacker could forge TAT queries to trick the trust anchor
           maintainer into a false impression of the adoption rate of a new
