@@ -170,18 +170,18 @@
       </section>
     </section>
 
-    <section title="Trust Anchor Telemetry Query">
+    <section title="Trust Anchor Telemetry">
       <t>The purpose of the mechanism described in this document is to allow
       the trust anchor maintainer to determine how widely deployed a given
       trust anchor is. This information is signaled from the validating
       resolver to the authoritative servers serving the zone in which the
       trust anchor lives by sending a periodic query to that zone. The query
-      type of the TAT Query is NULL. The query name is a TAT Owner Name, a
+      type of the TAT Query is NULL. The query name is a TAT Name, a
       format which encodes the list of the trust anchors for that zone that
-      are currently in use by the validating resolver, and optional metadata
-      about each key. Telemetry information can be retrieved by the trust
-      anchor maintainer by examining logged queries that match the TAT Name
-      format.</t>
+      are currently in use by the validating resolver, along with status
+      information about each key. Telemetry information can be retrieved
+      by the trust anchor maintainer by examining logged queries that
+      match the TAT Name format.</t>
 
       <section title="TAT Name Format">
         <t>The TAT Name is generated as follows:<list style="numbers">
@@ -213,6 +213,12 @@
             <t>Append _tat.&lt;domain&gt;</t>
           </list></t>
 
+        <t>Assuming no more than two digits for the Algorithm and five for
+        the Key Tag, a TAT Name for the root zone can encode up to 24 trust
+        anchors. [ Someone should probably check my math.  QUESTION: Do
+        we need to specify what will happen in the crazy case of a
+        resolver having configured more than 24 trust anchors? -each ]</t>
+
         <t>Examples: <list style="symbols">
             <t>If the resolver has a single trust anchor statically configured
             for the root zone, with an algorithm of RSASHA256 and a Key Tag of
@@ -234,7 +240,7 @@
           </list></t>
 
         <t>NOTE: The format of the TAT Name requires that Key Tags MUST be
-        unique, at least within "recent" history. If (e.g during a Key
+        unique, at least within "recent" history. If (e.g. during a Key
         Ceremony) a new DNSKEY is generated whose derived Key Tag collides
         with an exiting one (statistically unlikely, but not impossible) this
         DNSKEY MUST NOT be used, and a new DNSKEY MUST be generated. [ Ed
@@ -261,7 +267,7 @@
 
     <section title="Known issues and limitations">
       <t>This solution is designed to provide a rough idea of the rate of
-      uptake of a new key during a key rollover; perfect visibility is not an
+      uptake of a new key during a key rollover; perfect visibility is not
       achievable. In particular: <list style="numbers">
           <t>Only compliant resolvers will send telemetry queries; no
           information is provided from legacy resolvers, or from those who
@@ -272,8 +278,8 @@
           forwarded through the resolver. (Note, however, that forwarded
           queries are likely to be infrequent; responses to TAT queries will
           in most cases be negatively cached with an NXDOMAIN covering the
-          _TAT subdomain; subsequent queries will be answered from the cache
-          rather than forwarded to the trust anchor zone.)</t>
+          _TAT subdomain; subsequent client queries would be answered from
+          the cache rather than forwarded to the trust anchor zone.)</t>
 
           <t>An attacker could forge TAT queries to trick the trust anchor
           maintainer into a false impression of the adoption rate of a new
