@@ -288,15 +288,22 @@
 
       <t>[ Open Questions:</t>
 
-      <t>1: In order to disambiguate queries from resolvers versus those
-      forwarded through resolvers (or being recursed because of users behind
-      the resolver) we *could* add craziness like having resolvers include
-      ephemeral UUIDs or something...). Is this worth doing? (Personally I
-      think not...)</t>
+      <t>1: Validating resolvers may live behind forwarders, and in this case
+      we may want to disambiguate queries from resolvers who are directly
+      communicating with the auth server versus those resolvers whose queries
+      are being forwarded through resolvers (or being recursed because of users behind
+      the resolver) as otherwise the receipient of these queries will see
+      a set of queries from the same resolver conveying potentially
+      different information about the state of their trust anchors. We *could* 
+      add some form of UUID or something that is a constant tag that conveys no other
+      information other than enough to disambiguate it from other resolver instances. 
+      Is this worth doing?</t>
 
-      <t>2: We *could* also specify that compliant resolvers MUST NOT forward
+      <t>2: Or ..  We *could* also specify that compliant resolvers MUST NOT forward
       queries of type TDS to try limit this. Worth doing? This is some of the
-      reason for having a defined type.</t>
+      reason for having a defined type. (On the other hand, if validating
+      resolvers live behind forwarders, it would still be useful to have
+      their trust anchor state reported.)</t>
 
       <t>3: The authorative server *could* return a record with a long TTL to
       stop queries (if it knows that it is not doing a rollover in the near
