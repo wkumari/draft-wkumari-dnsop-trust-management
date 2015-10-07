@@ -100,9 +100,9 @@
 
     <date day="5" month="October" year="2015"/>
 
-    <area>template</area>
+    <area>area</area>
 
-    <workgroup>template</workgroup>
+    <workgroup>workgroup</workgroup>
 
     <abstract>
       <t>[ Editor note: This originally included a mechanism to actually roll

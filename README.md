@@ -4,7 +4,7 @@
 
 
 
-template                                                       W. Kumari
+workgroup                                                      W. Kumari
 Internet-Draft                                                    Google
 Intended status: Informational                                 G. Huston
 Expires: April 7, 2016                                             APNIC
@@ -16,7 +16,7 @@ Expires: April 7, 2016                                             APNIC
 
 
            Signalling of DNS Security (DNSSEC) Trust Anchors
-                draft-wkumari-dnsop-trust-management-01
+                draft-wkumari-dnsop-trust-management-02
 
 Abstract
 
@@ -101,13 +101,13 @@ Table of Contents
    3.  Sending the Trust Anchor Telemetry Query  . . . . . . . . . .   5
    4.  Known issues and limitations  . . . . . . . . . . . . . . . .   5
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
    7.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   7
    8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
    9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
      9.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .   7
-   Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   7
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   8
+   Appendix A.  Changes / Author Notes.  . . . . . . . . . . . . . .   8
 
 
 
@@ -293,15 +293,22 @@ Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
 
    [ Open Questions:
 
-   1: In order to disambiguate queries from resolvers versus those
-   forwarded through resolvers (or being recursed because of users
-   behind the resolver) we *could* add craziness like having resolvers
-   include ephemeral UUIDs or something...).  Is this worth doing?
-   (Personally I think not...)
+   1: Validating resolvers may live behind forwarders, and in this case
+   we may want to disambiguate queries from resolvers who are directly
+   communicating with the auth server versus those resolvers whose
+   queries are being forwarded through resolvers (or being recursed
+   because of users behind the resolver) as otherwise the receipient of
+   these queries will see a set of queries from the same resolver
+   conveying potentially different information about the state of their
+   trust anchors.  We *could* add some form of UUID or something that is
+   a constant tag that conveys no other information other than enough to
+   disambiguate it from other resolver instances.  Is this worth doing?
 
-   2: We *could* also specify that compliant resolvers MUST NOT forward
-   queries of type TDS to try limit this.  Worth doing?  This is some of
-   the reason for having a defined type.
+   2: Or ..  We *could* also specify that compliant resolvers MUST NOT
+   forward queries of type TDS to try limit this.  Worth doing?  This is
+   some of the reason for having a defined type.  (On the other hand, if
+   validating resolvers live behind forwarders, it would still be useful
+   to have their trust anchor state reported.)
 
    3: The authorative server *could* return a record with a long TTL to
    stop queries (if it knows that it is not doing a rollover in the near
@@ -323,6 +330,16 @@ Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
    There will need to be some text added to the DNSSEC Ceremony to
    handle this.
 
+
+
+
+
+
+Kumari, et al.            Expires April 7, 2016                 [Page 6]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
+
+
 6.  Security Considerations
 
    [ Ed note: a placeholder as well ]
@@ -332,14 +349,6 @@ Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
    the zone containing the TA (or attackers able to monitor the path
    between these devices).  It is conceviable that an attacker may be
    able to use this to determine that a resolver trusts an outdated /
-
-
-
-Kumari, et al.            Expires April 7, 2016                 [Page 6]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
-
-
    revoked trust anchor and perform a MitM attack.  This would also
    require the attacker to have factored the private key.  This seems
    farfetched....
@@ -375,6 +384,18 @@ Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
               10.17487/RFC7344, September 2014,
               <http://www.rfc-editor.org/info/rfc7344>.
 
+
+
+
+
+
+
+
+Kumari, et al.            Expires April 7, 2016                 [Page 7]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
+
+
 9.2.  Informative References
 
    [I-D.ietf-sidr-iana-objects]
@@ -387,14 +408,6 @@ Appendix A.  Changes / Author Notes.
    [RFC Editor: Please remove this section before publication ]
 
    From -00 to -01.1:
-
-
-
-
-Kumari, et al.            Expires April 7, 2016                 [Page 7]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
-
 
    o  Ripped all the actual keyroll logic out.
 
@@ -425,6 +438,20 @@ Authors' Addresses
    Email: warren@kumari.net
 
 
+
+
+
+
+
+
+
+
+
+Kumari, et al.            Expires April 7, 2016                 [Page 8]
+
+Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
+
+
    Geoff Huston
    APNIC
    6 Cordelia St
@@ -443,15 +470,6 @@ Authors' Addresses
    Email: each@isc.org
 
 
-
-
-
-
-Kumari, et al.            Expires April 7, 2016                 [Page 8]
-
-Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
-
-
    Roy Arends
    ICANN
    12025 Waterfront Drive, Suite 300
@@ -459,24 +477,6 @@ Internet-Draft    draft-wkumari-dnsop-trust-management      October 2015
    US
 
    Email: roy.arends@icann.org
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
